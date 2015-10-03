@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define MAXDATA 30000
+#define MAXDATA 50000
 typedef long ElementType;
 
 void BubbleSort(ElementType Data[], int n)
@@ -108,14 +108,14 @@ void PrintData(ElementType Data[], int n)
 	if(n > 20) return; /* データが多い時は表示しない */
 
 	while(n--)
-		printf("%4d", *(Data++));
+		printf("%4ld", *(Data++));
 	printf("\n");
 }
 
 int main(int argc, char *argv[])
 {
 	//int i;
-	int data_size = MAXDATA /* データ数 */, width = 100 /* 乱数の範囲（幅) */;
+	int data_size = MAXDATA /* データ数 */, width = 1000000000 /* 乱数の範囲（幅) */;
 	ElementType *data, *d1, *d2, *d3, *d4;
 	/* data: 乱数を入れる配列, d1, d2, d3, d4: ソートに渡す data のコピー用 */
 	int s1,e1; /* clock の記録、初めと終わり。その差で計算時間になる */

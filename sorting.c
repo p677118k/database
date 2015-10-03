@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
+#define MAXDATA 1000000
 typedef long ElementType;
 
 void BubbleSort(ElementType Data[], int n)
@@ -46,13 +47,14 @@ void InsertionSort(ElementType Data[], int n)
 int FindPivot(ElementType Data[], int i, int j)
 {
 	int k=i+1;
-	while(k<=j && Data[i]==Data[k])
+	while(k<=j){
+		if(Data[i]>Data[k])
+			return i;
+		if(Data[i]<Data[k])
+			return k;
 		k++;
-	if(k>j)
-		return -1;
-	if(Data[i]>=Data[k])
-		return i;
-	return k;
+	}
+	return -1;
 }
 
 int Partition(ElementType Data[], int i, int j,int x){
@@ -67,7 +69,8 @@ int Partition(ElementType Data[], int i, int j,int x){
 		int t=Data[l];
 		Data[l]=Data[r];
 		Data[r]=t;
-		l++; r--;
+		l++;
+		r--;
 	}
 	return l;
 }
@@ -81,6 +84,11 @@ void QuickSort(ElementType Data[], int i, int j){
 		QuickSort(Data,i,k-1);
 		QuickSort(Data,k,j);
 	}
+}
+
+int comp(const void *a, const void *b)
+{
+	    return *(int*)a - *(int*)b;
 }
 
 void GenData(ElementType Data[], int n, int w)
@@ -107,15 +115,15 @@ void PrintData(ElementType Data[], int n)
 	if(n > 20) return; /* データが多い時は表示しない */
 
 	while(n--)
-		printf("%4d", *(Data++));
+		printf("%4ld", *(Data++));
 	printf("\n");
 }
 
 int main(int argc, char *argv[])
 {
 	//int i;
-	int data_size = 20 /* データ数 */, width = 100 /* 乱数の範囲（幅) */;
-	ElementType *data, *d1, *d2, *d3, *d4;
+	int data_size = MAXDATA /* データ数 */, width = 100 /* 乱数の範囲（幅) */;
+	ElementType *data, *d1, *d2, *d3, *d4, *d5;
 	/* data: 乱数を入れる配列, d1, d2, d3, d4: ソートに渡す data のコピー用 */
 	int s1,e1; /* clock の記録、初めと終わり。その差で計算時間になる */
 
@@ -133,6 +141,7 @@ int main(int argc, char *argv[])
 	d2 = (ElementType *)malloc(sizeof(ElementType) * data_size);
 	d3 = (ElementType *)malloc(sizeof(ElementType) * data_size);
 	d4 = (ElementType *)malloc(sizeof(ElementType) * data_size);
+	d5 = (ElementType *)malloc(sizeof(ElementType) * data_size);
 	//randomize(); /* 乱数の初期化、呼び出すごとに異なる乱数発生 */
 	/* あるいは、　srandom(time(NULL)); */
 	srandom(time(NULL));
@@ -142,27 +151,30 @@ int main(int argc, char *argv[])
 	CopyData(d2, data, data_size);
 	CopyData(d3, data, data_size);
 	CopyData(d4, data, data_size);
+	CopyData(d5, data, data_size);
 
-	printf("Bubble Sort\n");
-	s1 = clock(); /* ソート実行前のシステム時間 */
-	BubbleSort(d2, data_size);
-	e1 = clock(); /* 実行後 */
-	PrintData(d2, data_size);
-	printf("CPU = %0.3lf\n", (double)(e1 - s1)/CLOCKS_PER_SEC);
-	/* clock を CLOCKS_PER_SEC で割ると秒 */
-	printf("Selection Sort\n");
-	s1 = clock();
-	SelectionSort(d3, data_size);
-	e1 = clock();
-	PrintData(d3, data_size);
-	printf("CPU = %0.3lf\n", (double)(e1 - s1)/CLOCKS_PER_SEC);
+	if(MAXDATA<=100000){
+		printf("Bubble Sort\n");
+		s1 = clock(); /* ソート実行前のシステム時間 */
+		BubbleSort(d2, data_size);
+		e1 = clock(); /* 実行後 */
+		PrintData(d2, data_size);
+		printf("CPU = %0.3lf\n", (double)(e1 - s1)/CLOCKS_PER_SEC);
+		/* clock を CLOCKS_PER_SEC で割ると秒 */
+		printf("Selection Sort\n");
+		s1 = clock();
+		SelectionSort(d3, data_size);
+		e1 = clock();
+		PrintData(d3, data_size);
+		printf("CPU = %0.3lf\n", (double)(e1 - s1)/CLOCKS_PER_SEC);
 
-	printf("Insertion Sort\n");
-	s1 = clock();
-	InsertionSort(d1, data_size);
-	e1 = clock();
-	PrintData(d1, data_size);
-	printf("CPU = %0.3lf\n", (double)(e1 - s1)/CLOCKS_PER_SEC);
+		printf("Insertion Sort\n");
+		s1 = clock();
+		InsertionSort(d1, data_size);
+		e1 = clock();
+		PrintData(d1, data_size);
+		printf("CPU = %0.3lf\n", (double)(e1 - s1)/CLOCKS_PER_SEC);
+	}
 
 	/* quicksort の呼び出し */
 	printf("Quick Sort\n");
@@ -171,5 +183,42 @@ int main(int argc, char *argv[])
 	e1 = clock();
 	PrintData(d4, data_size);
 	printf("CPU = %0.3lf\n", (double)(e1 - s1)/CLOCKS_PER_SEC);
+
+	/* qsort の呼び出し */
+	printf("qsort\n");
+	s1 = clock();
+	qsort(d5, data_size, sizeof(ElementType), comp);
+	e1 = clock();
+	PrintData(d5, data_size);
+	printf("CPU = %0.3lf\n", (double)(e1 - s1)/CLOCKS_PER_SEC);
 	return 0;
 }
+
+/*
+要素数を1000、10000、100000、1000000とした時の各ソートアルゴリズムの実行時間は以下のようになった。
+Bubble Sort
+　CPU = 0.007, 0.330, 32.808, -----
+Selection Sort
+　CPU = 0.005, 0.122, 11.812, -----
+Insertion Sort
+　CPU = 0.003, 0.078, 7.654, -----
+Quick Sort
+　CPU = 0.000, 0.001, 0.006, 0.057
+qsort
+　CPU = 0.000, 0.001, 0.012, 0.135
+
+以上の結果より、実行時間は、クイックソート、挿入法、選択法、バブルソートの順に短くなっていると分かる。
+各アルゴリズムの計算時間は、以下のようになっている。
+バブルソート	O(n^2)
+	選択法		O(n^2)
+	挿入法		O(n^2)
+	クイックソート	O(nlogn)
+
+	クイックソート以外のアルゴリズムに関しては、いずれも同じO(n^2)となっているが、計算時間に差が生じる結果となっている。
+	バブルソートと選択法では、共に比較回数は同じであるが、選択法の方がより少ない交換回数でソートを行うことが出来る。
+	また、選択法と挿入法では、共に交換回数は同じであるが、挿入法の方がより少ない比較回数でソートを行うことが出来る。
+	このことは、今回の測定で得られた結果からも明らかである。
+
+	次に、自作した関数QuickSortとライブラリ関数qsortを比較すると、自作した関数の実行時間の方が短いと分かる。
+	その要因としては、ライブラリ関数であるためライブラリの呼び出しに時間が掛かっていることが考えられる。
+*/
