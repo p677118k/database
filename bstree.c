@@ -99,13 +99,31 @@ void print_tree(bs_tree t)
 /* 2分探索木の要素をすべて昇順に表示する */
 void list_tree(bs_tree t)
 {
+	if(t->leftchild != NULL)
+		list_tree(t->leftchild);
 
+	printf("%d ", t->key);
+
+	if(t->rightchild != NULL)
+		list_tree(t->rightchild);
 }
 
 /* 2分探索木の高さを求める関数 */
 int height(bs_tree t)
 {
+	int lh,rh;
 
+	if(t == NULL)
+		return 0;
+
+	lh = height(t->leftchild);
+	rh = height(t->rightchild);
+
+	if(lh >= rh){
+		return lh+1;
+	} else {
+		return rh+1;
+	}
 }
 
 int main(void)
